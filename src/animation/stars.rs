@@ -99,6 +99,10 @@ impl StarSystem {
 
             return;
         }
+<<<<<<< HEAD
+=======
+
+>>>>>>> 3be89f9 (Fix stars not animating, oops)
 
         // Twinkle
         for star in &mut self.stars {
