@@ -33,7 +33,6 @@ pub struct MetOfficeProviderConfig {
     pub include_location_name: bool,
 
     pub api_key: String,
-
     #[serde(default)]
     pub data_source: String,
 }
