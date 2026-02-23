@@ -9,6 +9,7 @@ use crate::render::TerminalRenderer;
 use crate::scene::WorldScene;
 use crate::scene::house::House;
 use crate::weather::{FogIntensity, RainIntensity, SnowIntensity, WeatherConditions};
+use chrono::Local;
 use crossterm::style::Color;
 use std::io;
 use std::time::{Duration, Instant};
@@ -117,7 +118,20 @@ impl AnimationManager {
             && !conditions.is_thunderstorm
             && !conditions.is_snowing
         {
-            let animation_y = if term_height > 20 { 3 } else { 2 };
+            let mut animation_y = if term_height > 20 { 3 } else { 2 };
+            if let Some(events) = conditions.celestial_events {
+                let now = Local::now().time();
+                if let Some(upper_transit) = events.upper_transit
+                    && now < upper_transit
+                {
+                    animation_y += (upper_transit - now).num_minutes() as u16 / 20;
+                } else if let Some(end_twight) = events.end_twight
+                    && now > end_twight
+                {
+                    animation_y += (now - end_twight).num_minutes() as u16 / 20;
+                }
+            }
+
             self.animation_controller
                 .render_frame(renderer, &self.sunny_animation, animation_y)?;
         }

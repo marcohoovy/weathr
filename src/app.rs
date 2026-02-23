@@ -6,6 +6,7 @@ use crate::render::TerminalRenderer;
 use crate::scene::WorldScene;
 use crate::weather::provider::WeatherProvider;
 use crate::weather::provider::met_office::{MetOfficeProvider, MetOfficeProviderConfig};
+use crate::weather::types::CelestialEvents;
 use crate::weather::{
     OpenMeteoProvider, WeatherClient, WeatherCondition, WeatherData, WeatherLocation,
 };
@@ -52,7 +53,7 @@ fn generate_offline_weather(rng: &mut impl rand::Rng) -> WeatherData {
         cloud_cover: rng.random_range(20.0..80.0),
         pressure: rng.random_range(1000.0..1020.0),
         visibility: Some(10000.0),
-        is_day,
+        day: CelestialEvents::from_bool(is_day),
         moon_phase: Some(0.5),
         timestamp: now.format("%Y-%m-%dT%H:%M:%S").to_string(),
         attribution: "".to_string(),
@@ -122,7 +123,7 @@ impl App {
                 cloud_cover: 50.0,
                 pressure: 1013.0,
                 visibility: Some(10000.0),
-                is_day: !simulate_night,
+                day: CelestialEvents::from_bool(!simulate_night),
                 moon_phase: Some(0.5),
                 timestamp: "simulated".to_string(),
                 attribution: "".to_string(),
@@ -203,6 +204,7 @@ impl App {
                         if let Some(moon_phase) = weather.moon_phase {
                             self.animations.update_moon_phase(moon_phase);
                         }
+                        self.state.weather_conditions.celestial_events = Some(weather.day);
 
                         self.state.update_weather(weather);
                         self.animations.update_rain_intensity(rain_intensity);

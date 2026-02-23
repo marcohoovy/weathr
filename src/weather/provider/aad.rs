@@ -13,6 +13,7 @@ use crate::{
             SupplementaryProviderRequest, SupplementaryProviderResponse,
             SupplementaryWeatherProvider,
         },
+        types::CelestialEvents,
     },
 };
 
@@ -109,16 +110,35 @@ impl SupplementaryWeatherProvider for AADProvider {
                 let sun_data: Vec<SunData> =
                     serde_json::from_value(data["sundata"].clone()).unwrap();
 
-                let sunrise = get_sun_phase(&sun_data, CelestialPhenomena::Rise)
+                let start_twilight =
+                    get_sun_phase(&sun_data, CelestialPhenomena::BeginCivilTwilight)
+                        .unwrap()
+                        .to_chrono_time();
+                let rise = get_sun_phase(&sun_data, CelestialPhenomena::Rise)
                     .unwrap()
                     .to_chrono_time();
-                let sunset = get_sun_phase(&sun_data, CelestialPhenomena::Set)
+                let upper_transit = get_sun_phase(&sun_data, CelestialPhenomena::UpperTransit)
+                    .unwrap()
+                    .to_chrono_time();
+                let set = get_sun_phase(&sun_data, CelestialPhenomena::Set)
+                    .unwrap()
+                    .to_chrono_time();
+                let end_twilight = get_sun_phase(&sun_data, CelestialPhenomena::EndCivilTwilight)
                     .unwrap()
                     .to_chrono_time();
                 let current_time = now.time();
 
+                let events = CelestialEvents {
+                    is_day: current_time > start_twilight && current_time < end_twilight,
+                    begin_twight: Some(start_twilight),
+                    rise: Some(rise),
+                    upper_transit: Some(upper_transit),
+                    set: Some(set),
+                    end_twight: Some(end_twilight),
+                };
+
                 Ok(SupplementaryProviderResponse::SunAndMoonForOneDay {
-                    is_day: current_time > sunrise && current_time < sunset,
+                    day: events,
                     moon_phase: Some(current_moon_phase),
                 })
             }

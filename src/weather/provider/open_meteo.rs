@@ -1,7 +1,8 @@
 use crate::error::{NetworkError, WeatherError};
 use crate::weather::provider::{WeatherProvider, WeatherProviderResponse};
 use crate::weather::types::{
-    PrecipitationUnit, TemperatureUnit, WeatherLocation, WeatherUnits, WindSpeedUnit,
+    CelestialEvents, PrecipitationUnit, TemperatureUnit, WeatherLocation, WeatherUnits,
+    WindSpeedUnit,
 };
 use crate::weather::units::{normalize_precipitation, normalize_temperature, normalize_wind_speed};
 use async_trait::async_trait;
@@ -162,7 +163,7 @@ impl WeatherProvider for OpenMeteoProvider {
             cloud_cover: data.current.cloud_cover,
             pressure: data.current.surface_pressure,
             visibility: data.current.visibility,
-            is_day: data.current.is_day,
+            day: CelestialEvents::only_day(data.current.is_day),
             moon_phase,
             timestamp: data.current.time,
             attribution: self.get_attribution().to_string(),

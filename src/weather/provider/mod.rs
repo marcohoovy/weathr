@@ -1,5 +1,5 @@
 use crate::error::WeatherError;
-use crate::weather::types::{WeatherLocation, WeatherUnits};
+use crate::weather::types::{CelestialEvents, WeatherLocation, WeatherUnits};
 use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
 
@@ -19,7 +19,7 @@ pub struct WeatherProviderResponse {
     pub cloud_cover: f64,
     pub pressure: f64,
     pub visibility: Option<f64>,
-    pub is_day: i32,
+    pub day: CelestialEvents,
     pub moon_phase: Option<f64>,
     pub timestamp: String,
     pub attribution: String,
@@ -89,7 +89,7 @@ macro_rules! provider_enums {
 provider_enums! {
     PhasesOfMoon(Option<f64>),
     SunAndMoonForOneDay {
-        is_day: bool, // Consider i32 if support for twilight is added
+        day: CelestialEvents,
         moon_phase: Option<f64>
     }
 }

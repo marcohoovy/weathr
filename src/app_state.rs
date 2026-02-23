@@ -49,7 +49,8 @@ impl AppState {
             weather.condition.is_raining() && !self.weather_conditions.is_thunderstorm;
         self.weather_conditions.is_cloudy = weather.condition.is_cloudy();
         self.weather_conditions.is_foggy = weather.condition.is_foggy();
-        self.weather_conditions.is_day = weather.is_day;
+        self.weather_conditions.is_day = weather.day.is_day;
+        self.weather_conditions.celestial_events = Some(weather.day);
 
         self.current_weather = Some(weather);
         self.is_offline = false;
@@ -221,7 +222,9 @@ impl LoadingState {
 mod tests {
     use super::*;
     use crate::config::LocationDisplay;
-    use crate::weather::types::{PrecipitationUnit, TemperatureUnit, WindSpeedUnit};
+    use crate::weather::types::{
+        CelestialEvents, PrecipitationUnit, TemperatureUnit, WindSpeedUnit,
+    };
 
     fn create_app_state(lat: f64, lon: f64) -> AppState {
         create_app_state_full(lat, lon, None, LocationDisplay::Coordinates)
@@ -256,7 +259,7 @@ mod tests {
             cloud_cover: 0.0,
             pressure: 1013.0,
             visibility: Some(10.0),
-            is_day: true,
+            day: CelestialEvents::only_day(1),
             moon_phase: Some(0.5),
             timestamp: "2024-01-01T12:00:00Z".to_string(),
             attribution: "".to_string(),

@@ -15,6 +15,7 @@ use crate::{
             SupplementaryWeatherProvider, WeatherProvider, WeatherProviderResponse,
             aad::AADProvider,
         },
+        types::CelestialEvents,
         units::{normalize_precipitation, normalize_temperature, normalize_wind_speed},
     },
 };
@@ -198,7 +199,7 @@ impl WeatherProvider for MetOfficeProvider {
             cloud_cover: current_weather.uv_index as f64, // Unsure if this is correct
             pressure: current_weather.mslp as f64,
             visibility: Some(current_weather.visibility as f64),
-            is_day: current_weather.uv_index as i32, // Defaults - Theses will be gathered by the supplementary provider
+            day: CelestialEvents::only_day(current_weather.uv_index as i32), // Defaults - Theses will be gathered by the supplementary provider
             moon_phase: Some(0.5), // Defaults - Theses will be gathered by the supplementary provider
             timestamp: current_weather.time,
             attribution: self.get_attribution().to_string(),
@@ -214,10 +215,10 @@ impl WeatherProvider for MetOfficeProvider {
                 SupplementaryProviderRequest::SunAndMoonForOneDay,
             )
             .await?;
-        if let SupplementaryProviderResponse::SunAndMoonForOneDay { is_day, moon_phase } =
+        if let SupplementaryProviderResponse::SunAndMoonForOneDay { day, moon_phase } =
             celestial_data
         {
-            current_weather.is_day = if is_day { 1 } else { 0 };
+            current_weather.day = day;
             current_weather.moon_phase = moon_phase;
         }
 

@@ -1,6 +1,7 @@
 use weathr::weather::WeatherCondition;
 use weathr::weather::normalizer::WeatherNormalizer;
 use weathr::weather::provider::WeatherProviderResponse;
+use weathr::weather::types::CelestialEvents;
 
 #[test]
 fn test_weather_normalizer_integration_all_wmo_codes() {
@@ -47,7 +48,7 @@ fn test_weather_normalizer_integration_all_wmo_codes() {
             cloud_cover: 50.0,
             pressure: 1013.0,
             visibility: Some(10000.0),
-            is_day: 1,
+            day: CelestialEvents::only_day(1),
             moon_phase: None,
             timestamp: "2024-01-01T12:00".to_string(),
             attribution: "".to_string(),
@@ -75,7 +76,7 @@ fn test_weather_normalizer_integration_day_night() {
         cloud_cover: 0.0,
         pressure: 1013.0,
         visibility: Some(10000.0),
-        is_day: 1,
+        day: CelestialEvents::only_day(1),
         moon_phase: None,
         timestamp: "2024-01-01T12:00".to_string(),
         attribution: "".to_string(),
@@ -92,7 +93,7 @@ fn test_weather_normalizer_integration_day_night() {
         cloud_cover: 0.0,
         pressure: 1013.0,
         visibility: Some(10000.0),
-        is_day: 0,
+        day: CelestialEvents::only_day(1),
         moon_phase: None,
         timestamp: "2024-01-01T00:00".to_string(),
         attribution: "".to_string(),
@@ -101,8 +102,8 @@ fn test_weather_normalizer_integration_day_night() {
     let weather_day = WeatherNormalizer::normalize(response_day);
     let weather_night = WeatherNormalizer::normalize(response_night);
 
-    assert!(weather_day.is_day, "Should correctly identify day");
-    assert!(!weather_night.is_day, "Should correctly identify night");
+    assert!(weather_day.day.is_day, "Should correctly identify day");
+    assert!(!weather_night.day.is_day, "Should correctly identify night");
 }
 
 #[test]
@@ -118,7 +119,7 @@ fn test_weather_normalizer_integration_clear_conditions() {
         cloud_cover: 10.0,
         pressure: 1015.0,
         visibility: Some(15000.0),
-        is_day: 1,
+        day: CelestialEvents::only_day(1),
         moon_phase: None,
         timestamp: "2024-06-15T14:00".to_string(),
         attribution: "".to_string(),
@@ -131,7 +132,7 @@ fn test_weather_normalizer_integration_clear_conditions() {
     assert_eq!(weather.apparent_temperature, 21.0);
     assert_eq!(weather.humidity, 60.0);
     assert_eq!(weather.precipitation, 0.0);
-    assert!(weather.is_day);
+    assert!(weather.day.is_day);
 }
 
 #[test]
@@ -147,7 +148,7 @@ fn test_weather_normalizer_integration_rainy_conditions() {
         cloud_cover: 95.0,
         pressure: 1005.0,
         visibility: Some(3000.0),
-        is_day: 1,
+        day: CelestialEvents::only_day(1),
         moon_phase: None,
         timestamp: "2024-03-20T10:00".to_string(),
         attribution: "".to_string(),
@@ -173,7 +174,7 @@ fn test_weather_normalizer_integration_snowy_conditions() {
         cloud_cover: 100.0,
         pressure: 1010.0,
         visibility: Some(1000.0),
-        is_day: 0,
+        day: CelestialEvents::only_day(0),
         moon_phase: None,
         timestamp: "2024-01-10T22:00".to_string(),
         attribution: "".to_string(),
@@ -183,5 +184,5 @@ fn test_weather_normalizer_integration_snowy_conditions() {
 
     assert_eq!(weather.condition, WeatherCondition::Snow);
     assert!(weather.temperature < 0.0);
-    assert!(!weather.is_day);
+    assert!(!weather.day.is_day);
 }
