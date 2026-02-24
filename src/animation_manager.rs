@@ -126,9 +126,11 @@ impl AnimationManager {
                 {
                     animation_y += (upper_transit - now).num_minutes() as u16 / 20;
                 } else if let Some(end_twight) = events.end_twight
-                    && now > end_twight
+                    && now < end_twight
                 {
-                    animation_y += (now - end_twight).num_minutes() as u16 / 20;
+                    animation_y += (end_twight - now).num_minutes() as u16 / 20;
+                } else {
+                    todo!("{now} | {:?}", events.end_twight) // Condition to check if I've made a mistake
                 }
             }
 
