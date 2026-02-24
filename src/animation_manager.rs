@@ -129,6 +129,10 @@ impl AnimationManager {
                     && now < end_twight
                 {
                     animation_y += (end_twight - now).num_minutes() as u16 / 20;
+                } else if let Some(end_twight) = events.end_twight
+                    && now > end_twight
+                {
+                    animation_y = u16::MAX; // Hide the sun - This only occurs in edge cases
                 } else {
                     todo!("{now} | {:?}", events.end_twight) // Condition to check if I've made a mistake
                 }
