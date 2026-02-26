@@ -9,7 +9,7 @@ use crate::render::TerminalRenderer;
 use crate::scene::WorldScene;
 use crate::scene::house::House;
 use crate::weather::{FogIntensity, RainIntensity, SnowIntensity, WeatherConditions};
-use chrono::Local;
+use chrono::{Local, NaiveTime};
 use crossterm::style::Color;
 use std::io;
 use std::time::{Duration, Instant};
@@ -78,6 +78,27 @@ impl AnimationManager {
         self.fog_system.set_intensity(intensity);
     }
 
+    fn compute_y_based_on_time(
+        now: NaiveTime,
+        start: NaiveTime,
+        end: NaiveTime,
+        window_height: f32,
+    ) -> f32 {
+        use chrono::Timelike;
+        let now_s = now.num_seconds_from_midnight() as f32;
+        let start_s = start.num_seconds_from_midnight() as f32;
+        let end_s = end.num_seconds_from_midnight() as f32;
+
+        let total = end_s - start_s;
+        let elapsed = now_s - start_s;
+
+        let progress = (elapsed / total).clamp(0.0, 1.0);
+
+        let min_y = 3.0;
+
+        min_y + progress * (window_height - min_y)
+    }
+
     pub fn render_background(
         &mut self,
         renderer: &mut TerminalRenderer,
@@ -124,17 +145,19 @@ impl AnimationManager {
                 if let Some(upper_transit) = events.upper_transit
                     && now < upper_transit
                 {
+                    // animation_y = Self::compute_y_based_on_time(now, events.begin_twight.unwrap(), events.upper_transit.unwrap(), term_height as f32) as u16;
                     animation_y += (upper_transit - now).num_minutes() as u16 / 20;
                 } else if let Some(end_twight) = events.end_twight
                     && now < end_twight
                 {
-                    animation_y += (end_twight - now).num_minutes() as u16 / 20;
+                    // animation_y += ((end_twight - now).num_minutes() as u16).saturating_div(20);
+                    animation_y = Self::compute_y_based_on_time(now, events.upper_transit.unwrap(), end_twight, term_height as f32) as u16;
                 } else if let Some(end_twight) = events.end_twight
                     && now > end_twight
                 {
-                    animation_y = u16::MAX; // Hide the sun - This only occurs in edge cases
+                    animation_y = term_height; // Hide the sun - This only occurs in edge cases
                 } else {
-                    todo!("{now} | {:?}", events.end_twight) // Condition to check if I've made a mistake
+                    // todo!("{now} | {:?}", events.end_twight) // Condition to check if I've made a mistake
                 }
             }
 
